@@ -68,6 +68,7 @@ static void printUsage()
 	puts("\t-paired_exp_fraction <double>\t: remove all the paired end connections which less than the specified fraction of the expected count (default: 0.1)");
 	puts("\t-shortMatePaired* <yes|no>\t: for mate-pair libraries, indicate that the library might be contaminated with paired-end reads (default no)");
 	puts("\t-conserveLong <yes|no>\t\t: preserve sequences with long reads in them (default no)");
+  puts("\t-tour_bus <yes|no>\t\t: apply the tour bus algorithm (default yes)");
 	puts("");
 	puts("Output:");
 	puts("\tdirectory/contigs.fa\t\t: fasta file of contigs longer than twice hash length");
@@ -86,6 +87,7 @@ int main(int argc, char **argv)
 	    *preGraphFilename, *seqFilename, *roadmapFilename,
 	    *lowCovContigsFilename, *highCovContigsFilename;
 	double coverageCutoff = -1;
+  boolean doTourBus = true;
 	double longCoverageCutoff = -1;
 	double maxCoverageCutoff = -1;
 	double expectedCoverage = -1;
@@ -164,7 +166,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	// Memory allocation 
+	// Memory allocation
 	directory = argv[1];
 	graphFilename = mallocOrExit(strlen(directory) + 100, char);
 	connectedGraphFilename = mallocOrExit(strlen(directory) + 100, char);
@@ -181,9 +183,9 @@ int main(int argc, char **argv)
 		if (arg_index >= argc) {
 			velvetLog("Unusual number of arguments!\n");
 			printUsage();
-#ifdef DEBUG 
+#ifdef DEBUG
 			abort();
-#endif 
+#endif
 			exit(1);
 		}
 
@@ -210,9 +212,9 @@ int main(int argc, char **argv)
 			if (insertLength[0] < 0) {
 				velvetLog("Invalid insert length: %lli\n",
 				       (long long) insertLength[0]);
-#ifdef DEBUG 
+#ifdef DEBUG
 				abort();
-#endif 
+#endif
 				exit(1);
 			}
 		} else if (strcmp(arg, "-ins_length_sd") == 0) {
@@ -221,9 +223,9 @@ int main(int argc, char **argv)
 			if (std_dev[0] < 0) {
 				velvetLog("Invalid std deviation: %lli\n",
 				       (long long) std_dev[0]);
-#ifdef DEBUG 
+#ifdef DEBUG
 				abort();
-#endif 
+#endif
 				exit(1);
 			}
 		} else if (strcmp(arg, "-ins_length_long") == 0) {
@@ -238,9 +240,9 @@ int main(int argc, char **argv)
 			cat = (Category) short_var;
 			if (cat < 1 || cat > CATEGORIES) {
 				velvetLog("Unknown option: %s\n", arg);
-#ifdef DEBUG 
+#ifdef DEBUG
 				abort();
-#endif 
+#endif
 				exit(1);
 			}
 			sscanf(argv[arg_index], "%lli", &longlong_var);
@@ -248,9 +250,9 @@ int main(int argc, char **argv)
 			if (insertLength[cat - 1] < 0) {
 				velvetLog("Invalid insert length: %lli\n",
 				       (long long) insertLength[cat - 1]);
-#ifdef DEBUG 
+#ifdef DEBUG
 				abort();
-#endif 
+#endif
 				exit(1);
 			}
 		} else if (strncmp(arg, "-ins_length", 11) == 0) {
@@ -258,9 +260,9 @@ int main(int argc, char **argv)
 			cat = (Category) short_var;
 			if (cat < 1 || cat > CATEGORIES) {
 				velvetLog("Unknown option: %s\n", arg);
-#ifdef DEBUG 
+#ifdef DEBUG
 				abort();
-#endif 
+#endif
 				exit(1);
 			}
 			sscanf(argv[arg_index], "%lli", &longlong_var);
@@ -268,9 +270,9 @@ int main(int argc, char **argv)
 			if (std_dev[cat - 1] < 0) {
 				velvetLog("Invalid std deviation: %lli\n",
 				       (long long) std_dev[cat - 1]);
-#ifdef DEBUG 
+#ifdef DEBUG
 				abort();
-#endif 
+#endif
 				exit(1);
 			}
 		} else if (strcmp(arg, "-read_trkg") == 0) {
@@ -353,6 +355,9 @@ int main(int argc, char **argv)
 				exit(1);
 			}
 			shadows[cat - 1] = (strcmp(argv[arg_index], "yes") == 0);
+    } else if (strcmp(arg,"-tour_bus") == 0){
+      if (strcmp(argv[arg_index], "no") == 0)
+        doTourBus = false;
 		} else if (strcmp(arg, "--help") == 0) {
 			printUsage();
 			return 0;
@@ -452,7 +457,8 @@ int main(int argc, char **argv)
 
 		sequenceLengths =
 		    getSequenceLengths(sequences, getWordLength(graph));
-		correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
+    if (doTourBus)
+        correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
 		exportGraph(graphFilename, graph, sequences->tSequences);
 	} else if ((file = fopen(preGraphFilename, "r")) != NULL) {
 		fclose(file);
@@ -468,7 +474,8 @@ int main(int argc, char **argv)
 				   roadmapFilename, readTracking, accelerationBits);
 		sequenceLengths =
 		    getSequenceLengths(sequences, getWordLength(graph));
-		correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
+    if (doTourBus)
+        correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
 		exportGraph(graphFilename, graph, sequences->tSequences);
 	} else if ((file = fopen(roadmapFilename, "r")) != NULL) {
 		fclose(file);
@@ -523,13 +530,14 @@ int main(int argc, char **argv)
 				   roadmapFilename, readTracking, accelerationBits);
 		sequenceLengths =
 		    getSequenceLengths(sequences, getWordLength(graph));
-		correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
+    if (doTourBus)
+        correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
 		exportGraph(graphFilename, graph, sequences->tSequences);
 	} else {
 		velvetLog("No Roadmap file to build upon! Please run velveth (see manual)\n");
-#ifdef DEBUG 
+#ifdef DEBUG
 		abort();
-#endif 
+#endif
 		exit(1);
 	}
 
@@ -553,11 +561,11 @@ int main(int argc, char **argv)
 			coverageCutoff = expectedCoverage / 2;
 			estimateCutoff = true;
 		}
-	} else { 
+	} else {
 		estimateCoverage = false;
-		if (coverageCutoff < 0 && estimateCutoff) 
+		if (coverageCutoff < 0 && estimateCutoff)
 			coverageCutoff = estimated_cov(graph, directory) / 2;
-		else 
+		else
 			estimateCutoff = false;
 	}
 
@@ -580,7 +588,7 @@ int main(int argc, char **argv)
 	if (minContigLength < 2 * getWordLength(graph))
 		minContigKmerLength = getWordLength(graph);
 	else
-		minContigKmerLength = minContigLength - getWordLength(graph) + 1;		
+		minContigKmerLength = minContigLength - getWordLength(graph) + 1;
 
 	dubious =
 	    removeLowCoverageNodesAndDenounceDubiousReads(graph,
@@ -635,7 +643,7 @@ int main(int argc, char **argv)
 	strcpy(graphFilename, directory);
 	strcat(graphFilename, "/contigs.fa");
 	sequenceLengths = getSequenceLengths(sequences, getWordLength(graph));
-	exportLongNodeSequences(graphFilename, graph, minContigKmerLength, sequences, sequenceLengths, coverageMask); 
+	exportLongNodeSequences(graphFilename, graph, minContigKmerLength, sequences, sequenceLengths, coverageMask);
 
 	if (exportAlignments) {
 		strcpy(graphFilename, directory);
@@ -663,9 +671,9 @@ int main(int argc, char **argv)
 	if (unusedReads)
 		exportUnusedReads(graph, sequences, minContigKmerLength, directory);
 
-	if (estimateCoverage) 
+	if (estimateCoverage)
 		velvetLog("Estimated Coverage = %f\n", expectedCoverage);
-	if (estimateCutoff) 
+	if (estimateCutoff)
 		velvetLog("Estimated Coverage cutoff = %f\n", coverageCutoff);
 
 	logFinalStats(graph, minContigKmerLength, directory);
@@ -673,25 +681,25 @@ int main(int argc, char **argv)
 	if (clean > 0) {
 		strcpy(graphFilename, directory);
 		strcat(graphFilename, "/Roadmaps");
-		remove(graphFilename);	
+		remove(graphFilename);
 
 		strcpy(graphFilename, directory);
 		strcat(graphFilename, "/LastGraph");
-		remove(graphFilename);	
-	} 
+		remove(graphFilename);
+	}
 
 	if (clean > 1) {
 		strcpy(graphFilename, directory);
 		strcat(graphFilename, "/Sequences");
-		remove(graphFilename);	
+		remove(graphFilename);
 
 		strcpy(graphFilename, directory);
 		strcat(graphFilename, "/Graph2");
-		remove(graphFilename);	
+		remove(graphFilename);
 
 		strcpy(graphFilename, directory);
 		strcat(graphFilename, "/Graph");
-		remove(graphFilename);	
+		remove(graphFilename);
 	}
 
 	free(sequenceLengths);
