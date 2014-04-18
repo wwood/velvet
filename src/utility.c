@@ -97,6 +97,7 @@ void exitErrorf(int exitStatus, boolean showErrno, const char *format, ...)
 
 void velvetLog(const char *format, ...)
 {
+/*
   static boolean timeIsSet = false;
   static struct timeval tvStart;
   struct timeval tvNow;
@@ -120,6 +121,7 @@ void velvetLog(const char *format, ...)
 #ifdef DEBUG 
   fflush(stdout);
 #endif
+*/
 }
 
 void velvetFprintf(FILE * file, const char * format, ...) 

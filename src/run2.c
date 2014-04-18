@@ -660,6 +660,8 @@ int main(int argc, char **argv)
 		strcpy(graphFilename, directory);
 		strcat(graphFilename, "/LastGraph");
 		exportGraph(graphFilename, graph, sequences->tSequences);
+    velvetLog("Printing binary LastGraph to basename %s",graphFilename);
+    exportBinaryGraph(graphFilename, graph, sequences->tSequences);
 	}
 
 	if (exportAssembly) {
