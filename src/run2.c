@@ -77,7 +77,7 @@ static void printUsage()
 	puts("\tdirectory/velvet_asm.afg\t: (if requested) AMOS compatible assembly file");
 }
 
-int main(int argc, char **argv)
+int velvetg(int argc, char **argv)
 {
 	ReadSet *sequences = NULL;
 	RoadMapArray *rdmaps;
