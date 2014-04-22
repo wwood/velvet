@@ -1,5 +1,5 @@
 /*
-Copyright 2009 John Marshall (jm18@sanger.ac.uk) 
+Copyright 2009 John Marshall (jm18@sanger.ac.uk)
 
     This file is part of Velvet.
 
@@ -89,14 +89,15 @@ void exitErrorf(int exitStatus, boolean showErrno, const char *format, ...)
        fprintf(stderr, "\n");
        va_end(args);
 
-#ifdef DEBUG 
+#ifdef DEBUG
 	abort();
-#endif 
+#endif
        exit(exitStatus);
 }
 
 void velvetLog(const char *format, ...)
 {
+  /*
   static boolean timeIsSet = false;
   static struct timeval tvStart;
   struct timeval tvNow;
@@ -117,12 +118,12 @@ void velvetLog(const char *format, ...)
   vprintf(format, args);
   va_end(args);
 
-#ifdef DEBUG 
+#ifdef DEBUG
   fflush(stdout);
-#endif
+#endif*/
 }
 
-void velvetFprintf(FILE * file, const char * format, ...) 
+void velvetFprintf(FILE * file, const char * format, ...)
 {
 	va_list args;
 
@@ -132,9 +133,9 @@ void velvetFprintf(FILE * file, const char * format, ...)
 		       fprintf(stderr, "%s: ", programName);
 		fprintf(stderr, "Could not write into file\n");
 		va_end(args);
-#ifdef DEBUG 
+#ifdef DEBUG
 		abort();
-#endif 
+#endif
 		exit(EXIT_FAILURE);
 	}
 	va_end(args);
