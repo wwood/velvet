@@ -2451,10 +2451,9 @@ void clipTipsHard(Graph * graph, boolean conserveLong)
 	int Wordlength = getWordLength(graph);
 	PassageMarkerI marker;
 
-	velvetLog("NOTTTT Clipping short tips off graph, drastic\n");
+	velvetLog("Clipping short tips off graph, drastic\n");
 
-	while (false) {
-  //while (modified) {
+	while (modified) {
 		modified = false;
 		for (index = 1; index <= nodeCount(graph); index++) {
 			current = getNodeInGraph(graph, index);

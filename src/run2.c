@@ -68,7 +68,8 @@ static void printUsage()
 	puts("\t-paired_exp_fraction <double>\t: remove all the paired end connections which less than the specified fraction of the expected count (default: 0.1)");
 	puts("\t-shortMatePaired* <yes|no>\t: for mate-pair libraries, indicate that the library might be contaminated with paired-end reads (default no)");
 	puts("\t-conserveLong <yes|no>\t\t: preserve sequences with long reads in them (default no)");
-  puts("\t-tour_bus <yes|no>\t\t: apply the tour bus algorithm (default yes)");
+	puts("\t-clip_tips <yes|no>\t\t: do tip clipping on pre-graph (default yes)");
+	puts("\t-tour_bus <yes|no>\t\t: apply the tour bus algorithm (default yes)");
 	puts("");
 	puts("Output:");
 	puts("\tdirectory/contigs.fa\t\t: fasta file of contigs longer than twice hash length");
@@ -87,8 +88,9 @@ int velvetg(int argc, char **argv)
 	    *preGraphFilename, *seqFilename, *roadmapFilename,
 	    *lowCovContigsFilename, *highCovContigsFilename;
 	double coverageCutoff = -1;
+  boolean doClipTips = true;
   boolean doTourBus = true;
-	double longCoverageCutoff = -1;
+  double longCoverageCutoff = -1;
 	double maxCoverageCutoff = -1;
 	double expectedCoverage = -1;
 	Coordinate minContigLength = -1;
@@ -355,6 +357,9 @@ int velvetg(int argc, char **argv)
 				exit(1);
 			}
 			shadows[cat - 1] = (strcmp(argv[arg_index], "yes") == 0);
+    } else if (strcmp(arg,"-clip_tips") == 0){
+      if (strcmp(argv[arg_index], "no") == 0)
+        doClipTips = false;
     } else if (strcmp(arg,"-tour_bus") == 0){
       if (strcmp(argv[arg_index], "no") == 0)
         doTourBus = false;
@@ -516,7 +521,7 @@ int velvetg(int argc, char **argv)
 		}
 		preGraph = newPreGraph_pg(rdmaps, seqReadInfo);
 		concatenatePreGraph_pg(preGraph);
-		if (!conserveLong)
+		if (!conserveLong && doClipTips)
 		    clipTips_pg(preGraph);
 		exportPreGraph_pg(preGraphFilename, preGraph);
 		destroyPreGraph_pg(preGraph);
@@ -607,7 +612,8 @@ int velvetg(int argc, char **argv)
 							  lowCovContigsFilename);
 
 	removeHighCoverageNodes(graph, maxCoverageCutoff, exportFilteredNodes, minContigKmerLength, highCovContigsFilename);
-	clipTipsHard(graph, conserveLong);
+	if (doClipTips)
+		clipTipsHard(graph, conserveLong);
 
 	if (sequences->readCount > 0 && sequences->categories[0] == REFERENCE)
 		removeLowArcs(graph, coverageCutoff);

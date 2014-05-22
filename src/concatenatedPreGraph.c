@@ -237,24 +237,24 @@ void clipTips_pg(PreGraph * preGraph)
 
 	velvetLog("Clipping short tips off preGraph\n");
 
-//	while (modified) {
-//		modified = false;
-//		for (index = 1; index <= preNodeCount_pg(preGraph);
-//		     index++) {
-//			current = getPreNodeInPreGraph_pg(preGraph, index);
-//
-//			if (current == NULL)
-//				continue;
-//
-//			if (isEligibleTip(index, preGraph, cutoffLength)
-//			    || isEligibleTip(-index, preGraph,
-//					     cutoffLength)) {
-//				counter++;
-//				destroyPreNode_pg(index, preGraph);
-//				modified = true;
-//			}
-//		}
-//	}
+	while (modified) {
+		modified = false;
+		for (index = 1; index <= preNodeCount_pg(preGraph);
+		     index++) {
+			current = getPreNodeInPreGraph_pg(preGraph, index);
+
+			if (current == NULL)
+				continue;
+
+			if (isEligibleTip(index, preGraph, cutoffLength)
+			    || isEligibleTip(-index, preGraph,
+					     cutoffLength)) {
+				counter++;
+				destroyPreNode_pg(index, preGraph);
+				modified = true;
+			}
+		}
+	}
 
 	concatenatePreGraph_pg(preGraph);
 	velvetLog("%li tips cut off\n", (long) counter);
