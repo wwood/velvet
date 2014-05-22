@@ -125,7 +125,8 @@ void velvetLog(const char *format, ...)
 
 void velvetFprintf(FILE * file, const char * format, ...)
 {
-	va_list args;
+/*	Don't print anything as it interferes with code bound through bioruby-velvet_underground
+  va_list args;
 
 	va_start(args, format);
 	if (vfprintf(file, format, args) < 0) {
@@ -138,7 +139,7 @@ void velvetFprintf(FILE * file, const char * format, ...)
 #endif
 		exit(EXIT_FAILURE);
 	}
-	va_end(args);
+	va_end(args);*/
 }
 
 StringBuffer *newStringBuffer(size_t size)
