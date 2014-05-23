@@ -97,7 +97,7 @@ void exitErrorf(int exitStatus, boolean showErrno, const char *format, ...)
 
 void velvetLog(const char *format, ...)
 {
-  /*
+  /*     Don't print anything as it interferes with code bound through bioruby-velvet_underground
   static boolean timeIsSet = false;
   static struct timeval tvStart;
   struct timeval tvNow;
@@ -125,7 +125,6 @@ void velvetLog(const char *format, ...)
 
 void velvetFprintf(FILE * file, const char * format, ...)
 {
-/*	Don't print anything as it interferes with code bound through bioruby-velvet_underground
   va_list args;
 
 	va_start(args, format);
@@ -139,7 +138,7 @@ void velvetFprintf(FILE * file, const char * format, ...)
 #endif
 		exit(EXIT_FAILURE);
 	}
-	va_end(args);*/
+	va_end(args);
 }
 
 StringBuffer *newStringBuffer(size_t size)
