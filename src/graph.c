@@ -30,63 +30,12 @@ Copyright 2007, 2008 Daniel Zerbino (zerbino@ebi.ac.uk)
 #include "utility.h"
 #include "kmer.h"
 
+#include "graphStructures.h"
+
 #define ADENINE 0
 #define CYTOSINE 1
 #define GUANINE 2
 #define THYMINE 3
-
-struct arc_st {
-	Arc *twinArc;		// 64
-	Arc *next;		// 64
-	Arc *previous;		// 64
-	Arc *nextInLookupTable;	// 64
-	Node *destination;	// 64
-	IDnum multiplicity;	// 32
-}  ATTRIBUTE_PACKED;	// 352 Total
-
-struct node_st {
-	Node *twinNode;		// 64
-	Arc *arc;		// 64
-	Descriptor *descriptor;	// 64
-	PassageMarkerI marker;	// 32
-	IDnum length;	// 32
-#ifndef SINGLE_COV_CAT
-	IDnum virtualCoverage[CATEGORIES];	// 32 * 2
-	IDnum originalVirtualCoverage[CATEGORIES];	// 32 * 2
-#else
-	IDnum virtualCoverage;	// 32 * 2
-#endif
-	IDnum ID;		// 32
-	IDnum arcCount;		// 32
-	boolean status;		// 1
-	boolean uniqueness;	// 1
-} ATTRIBUTE_PACKED;	// 418 Total
-
-struct shortReadMarker_st {
-	IDnum position;
-	IDnum readID;
-	ShortLength offset;
-} ATTRIBUTE_PACKED;
-
-struct gapMarker_st {
-	GapMarker *next;
-	IDnum position;
-	IDnum length;
-} ATTRIBUTE_PACKED;
-
-struct graph_st {
-	Node **nodes;
-	Arc **arcLookupTable;
-	ShortReadMarker **nodeReads;
-	IDnum *nodeReadCounts;
-	GapMarker **gapMarkers;
-	Coordinate insertLengths[CATEGORIES + 1];
-	double insertLengths_var[CATEGORIES + 1];
-	IDnum sequenceCount;
-	IDnum nodeCount;
-	int wordLength;
-	boolean double_stranded;
-};
 
 static RecycleBin *arcMemory = NULL;
 static RecycleBin *nodeMemory = NULL;
@@ -906,7 +855,7 @@ void appendDescriptors(Node * destination, Node * source)
 	twinDestination->length = newLength;
 }
 
-static void catDescriptors(Descriptor * descr, Coordinate destinationLength, Descriptor * copy, Coordinate sourceLength) 
+static void catDescriptors(Descriptor * descr, Coordinate destinationLength, Descriptor * copy, Coordinate sourceLength)
 {
 	Coordinate index;
 	Nucleotide nucleotide;
@@ -917,7 +866,7 @@ static void catDescriptors(Descriptor * descr, Coordinate destinationLength, Des
 	}
 }
 
-static void reverseCatDescriptors(Descriptor * descr, Coordinate destinationLength, Descriptor * copy, Coordinate sourceLength, Coordinate totalLength) 
+static void reverseCatDescriptors(Descriptor * descr, Coordinate destinationLength, Descriptor * copy, Coordinate sourceLength, Coordinate totalLength)
 {
 	Coordinate shift = totalLength - destinationLength - sourceLength;
 	Coordinate index;
@@ -2052,7 +2001,7 @@ Graph *importGraph(char *filename)
 	short short_var;
 	char c;
 
-	if (file == NULL) 
+	if (file == NULL)
 		exitErrorf(EXIT_FAILURE, true, "Could not open %s", filename);
 
 	velvetLog("Reading graph file %s\n", filename);
@@ -2204,9 +2153,9 @@ Graph *importGraph(char *filename)
 				velvetLog
 				    ("ERROR: reading in graph - only %d items read for line '%s'",
 				     sCount, line);
-#ifdef DEBUG 
+#ifdef DEBUG
 				abort();
-#endif 
+#endif
 				exit(1);
 			}
 			newMarker =
@@ -2404,7 +2353,7 @@ Graph *readPreGraphFile(char *preGraphFilename, boolean * double_strand)
 #endif
 				}
 			}
-			
+
 			index++;
 		}
 
@@ -2506,7 +2455,7 @@ Graph *readConnectedGraphFile(char *connectedGraphFilename, boolean * double_str
 		twin = node->twinNode;
 		twin->length = node->length;
 		twin->descriptor =
-			callocOrExit(arrayLength, Descriptor);   
+			callocOrExit(arrayLength, Descriptor);
 
 		index = 0;
 		while ((c = getc(file)) != '\n') {
@@ -3973,7 +3922,7 @@ void reallocateNodeDescriptor(Node * node, Coordinate length) {
 		nucleotide = getNucleotideInDescriptor(twin->descriptor, index);
 		writeNucleotideInDescriptor(nucleotide, array, index + shift);
 	}
-	
+
 	free(twin->descriptor);
 	twin->descriptor = array;
 }
