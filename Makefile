@@ -43,12 +43,12 @@ OBJSHARED = $(subst obj,obj/shared,$(OBJ))
 default : cleanobj zlib obj velveth velvetg doc
 
 clean : clean-zlib
-	-rm obj/*.o obj/dbg/*.o ./velvet*
+	-rm obj/*.o obj/dbg/*.o ./velvet* obj/shared/*.o
 	-rm -f doc/manual_src/Manual.toc doc/manual_src/Manual.aux doc/manual_src/Manual.out doc/manual_src/Manual.log
 	-rm -f doc/manual_src/Columbus_manual.aux doc/manual_src/Columbus_manual.out doc/manual_src/Columbus_manual.log
 
 cleanobj:
-	-rm obj/*.o obj/dbg/*.o
+	-rm obj/*.o obj/dbg/*.o obj/shared/*.o
 
 ifdef BUNDLEDZLIB
 Z_LIB_DIR=third-party/zlib-1.2.3
