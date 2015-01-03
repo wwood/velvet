@@ -27,6 +27,7 @@ Copyright 2007, 2008 Daniel Zerbino (zerbino@ebi.ac.uk)
 
 #include "binarySequences.h"
 #include "globals.h"
+#include "readToNode.h"
 
 static void printUsage()
 {
@@ -69,6 +70,7 @@ static void printUsage()
 	puts("\t-shortMatePaired* <yes|no>\t: for mate-pair libraries, indicate that the library might be contaminated with paired-end reads (default no)");
 	puts("\t-conserveLong <yes|no>\t\t: preserve sequences with long reads in them (default no)");
   puts("\t-tour_bus <yes|no>\t\t: apply the tour bus algorithm (default yes)");
+	puts("\t-read_to_node_binary <yes|no>\t: create binary ReadToNode file for looking up which nodes contain each read (default: no)");
 	puts("");
 	puts("Output:");
 	puts("\tdirectory/contigs.fa\t\t: fasta file of contigs longer than twice hash length");
@@ -88,6 +90,7 @@ int main(int argc, char **argv)
 	    *lowCovContigsFilename, *highCovContigsFilename;
 	double coverageCutoff = -1;
   boolean doTourBus = true;
+  boolean createReadToNodeFile = false;
 	double longCoverageCutoff = -1;
 	double maxCoverageCutoff = -1;
 	double expectedCoverage = -1;
@@ -358,6 +361,9 @@ int main(int argc, char **argv)
     } else if (strcmp(arg,"-tour_bus") == 0){
       if (strcmp(argv[arg_index], "no") == 0)
         doTourBus = false;
+    } else if (strcmp(arg, "-read_to_node_binary") == 0){
+			createReadToNodeFile =
+			    (strcmp(argv[arg_index], "yes") == 0);
 		} else if (strcmp(arg, "--help") == 0) {
 			printUsage();
 			return 0;
@@ -380,7 +386,7 @@ int main(int argc, char **argv)
 	} else {
 		seqReadInfo->m_bIsBinary = false;
 		strcpy(seqFilename, directory);
-	strcat(seqFilename, "/Sequences");
+    strcat(seqFilename, "/Sequences");
 	}
 	seqReadInfo->m_seqFilename = seqFilename;
 	strcpy(roadmapFilename, directory);
@@ -405,6 +411,12 @@ int main(int argc, char **argv)
 
 	strcpy(highCovContigsFilename, directory);
 	strcat(highCovContigsFilename, "/highCoverageContigs.fa");
+
+  // Check consistency of arguments
+  if (createReadToNodeFile && !readTracking){
+   velvetLog("When -create_read_to_node_binary is used, -read_trkg must also be used\n");
+   exit(1);
+  }
 
 	// Graph uploading or creation
 	if ((file = fopen(graphFilename, "r")) != NULL) {
@@ -590,6 +602,8 @@ int main(int argc, char **argv)
 	else
 		minContigKmerLength = minContigLength - getWordLength(graph) + 1;
 
+  // Check
+
 	dubious =
 	    removeLowCoverageNodesAndDenounceDubiousReads(graph,
 							  coverageCutoff,
@@ -675,6 +689,16 @@ int main(int argc, char **argv)
 		velvetLog("Estimated Coverage = %f\n", expectedCoverage);
 	if (estimateCutoff)
 		velvetLog("Estimated Coverage cutoff = %f\n", coverageCutoff);
+
+  if (createReadToNodeFile) {
+    velvetLog("Creating and writing ReadToNode binary file..\n");
+    strcpy(graphFilename, directory);
+    strcat(graphFilename, "/ReadToNode.bin");
+    ReadIdToNodeIdLookupTable* lookupTable = createReadToNode(graph);
+    writeReadIdToNodeIdLookupTable(graphFilename, lookupTable);
+    destroyReadIdToNodeIdLookupTable(lookupTable);
+    velvetLog("Finished writing ReadToNode binary file\n");
+  }
 
 	logFinalStats(graph, minContigKmerLength, directory);
 
