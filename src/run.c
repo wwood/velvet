@@ -103,14 +103,15 @@ int main(int argc, char **argv)
 	boolean double_strand = true;
 	boolean noHash = false;
 	boolean multiple_kmers = false;
+	char buffer[100];
 	DIR *dir;
 
 	setProgramName("velveth");
 
 	if (argc < 4) {
 		printf("velveth - simple hashing program\n");
-		printf("Version %i.%i.%2.2i\n", VERSION_NUMBER,
-		       RELEASE_NUMBER, UPDATE_NUMBER);
+		printf("Version %i.%i.%2.2i%s\n", VERSION_NUMBER,
+		       RELEASE_NUMBER, UPDATE_NUMBER, VERSION_BRANCH);
 		printf("\nCopyright 2007, 2008 Daniel Zerbino (zerbino@ebi.ac.uk)\n");
 		printf("This is free software; see the source for copying conditions.  There is NO\n");
 		printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
@@ -137,7 +138,8 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	token = strtok(argv[2], ",");
+	strcpy(buffer, argv[2]);
+	token = strtok(buffer, ",");
 	hashLength = atoi(token);
 	token = strtok(NULL, ",");
 	if (token == NULL) {

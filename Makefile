@@ -6,9 +6,10 @@ OPT = -O3
 MAXKMERLENGTH=31
 CATEGORIES=2
 DEF = -D MAXKMERLENGTH=$(MAXKMERLENGTH) -D CATEGORIES=$(CATEGORIES)
+PDFLATEX_VERSION := $(shell pdflatex --version 2> /dev/null)
 
 # Mac OS users: uncomment the following lines
-# CFLAGS = -Wall -m64
+CFLAGS = -Wall -m64
 
 # Sparc/Solaris users: uncomment the following line
 # CFLAGS = -Wall -m64
@@ -115,7 +116,11 @@ obj/dbg/%.o: src/%.c
 doc: Manual.pdf
 
 Manual.pdf: doc/manual_src/Manual.tex doc/manual_src/Columbus_manual.tex
+ifdef PDFLATEX_VERSION
 	cd doc/manual_src; pdflatex Manual.tex; pdflatex Manual.tex; mv Manual.pdf ../..; pdflatex Columbus_manual.tex; mv Columbus_manual.pdf ../..
+else
+	@echo pdflatex not found, cannot rebuild the manual.
+endif
 
 test: velvetg velveth
 	cd tests && ./run-tests.sh

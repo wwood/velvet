@@ -72,7 +72,7 @@ static Mask * newMask(SequencesWriter *seqWriteInfo, Coordinate position)
 // note that createBinary is only used by velveth
 //
 boolean createBinary = false;
-inline boolean isCreateBinary()
+boolean isCreateBinary()
 {
 	return createBinary;
 }
@@ -745,9 +745,9 @@ static void addMapping(boolean orientation, Coordinate pos, char * seq, Referenc
 		seqWriteInfo->m_refCnt++;
 	} else {
 		if (refCoord->positive_strand) {
-			sprintf(buffer, "%sM\t%li\t%lli\n", buffer, (long) orientation * refCoord->referenceID, (long long) (pos - refCoord->start));
+			snprintf(buffer, *buffer_size, "%sM\t%li\t%lli\n", buffer, (long) orientation * refCoord->referenceID, (long long) (pos - refCoord->start));
 		} else 
-			sprintf(buffer, "%sM\t%li\t%lli\n", buffer, (long) - orientation * refCoord->referenceID, (long long) (refCoord->finish - pos - strlen(seq)));
+			snprintf(buffer, *buffer_size, "%sM\t%li\t%lli\n", buffer, (long) - orientation * refCoord->referenceID, (long long) (refCoord->finish - pos - strlen(seq)));
 
 		if (*buffer_size - strlen(buffer) < 100) {
 			*buffer_size += 1000;
@@ -1579,7 +1579,7 @@ ReadSet *importReadSet(char *filename)
 		} else {
 			bpCount += (Coordinate) strlen(line) - 1;
 
-			if (sizeof(ShortLength) == sizeof(int16_t) && bpCount > SHRT_MAX) {
+			if (sizeof(ShortLength) == sizeof(int16_t) && (bpCount > SHRT_MAX || bpCount < 0)) {
 				velvetLog("Read %li of length %lli, longer than limit %i\n",
 				       (long) sequenceIndex + 1, (long long) bpCount, SHRT_MAX);
 				velvetLog("You should modify recompile with the LONGSEQUENCES option (cf. manual)\n");
@@ -1650,8 +1650,8 @@ void logInstructions(int argc, char **argv, char *directory)
 
 	velvetFprintf(logFile, "\n");
 
-	velvetFprintf(logFile, "Version %i.%i.%2.2i\n", VERSION_NUMBER,
-	       RELEASE_NUMBER, UPDATE_NUMBER);
+	velvetFprintf(logFile, "Version %i.%i.%2.2i%s\n", VERSION_NUMBER,
+		RELEASE_NUMBER, UPDATE_NUMBER, VERSION_BRANCH);
 	velvetFprintf(logFile, "Copyright 2007, 2008 Daniel Zerbino (zerbino@ebi.ac.uk)\n");
 	velvetFprintf(logFile, "This is free software; see the source for copying conditions.  There is NO\n");
 	velvetFprintf(logFile, "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
