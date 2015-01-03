@@ -39,7 +39,7 @@ Copyright 2007, 2008 Daniel Zerbino (zerbino@ebi.ac.uk)
 #define VERSION_NUMBER 1
 #define RELEASE_NUMBER 2
 #define UPDATE_NUMBER 10
-#define VERSION_BRANCH "-wwood_less_clipping"
+#define VERSION_BRANCH "-wwood_finishm"
 
 #define MAXLINE 5000
 
