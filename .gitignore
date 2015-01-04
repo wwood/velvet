@@ -1,3 +1,4 @@
 *.o
 velvetg
 velveth
+obj/
