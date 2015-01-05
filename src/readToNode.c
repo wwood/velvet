@@ -152,7 +152,6 @@ ReadIdToNodeIdLookupTable* readReadIdToNodeIdLookupTable(char* fileName){
 
   //read index array
   lookupTable->index = mallocOrExit((lookupTable->num_reads), IDnum);
-  printf("mal\n");
   if (fread(lookupTable->index, sizeof(IDnum), lookupTable->num_reads, fp) != lookupTable->num_reads){
 		velvetLog("Unknown format (at index stage) for file %s\n", fileName);
 		fclose(fp);

@@ -134,4 +134,4 @@ obj/shared/%.o: src/%.c
 	$(CC) -fPIC $(CFLAGS) $(DEBUG) $(DEF) -c $? -o $@
 
 finishm: zlib obj/shared
-	cd obj/shared && gcc -shared -Wl,-soname,libfinishm.so.1 -o libfinishm.so.1.0 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o probe_node_finder.o
+	cd obj/shared && gcc -shared -Wl,-soname,libfinishm.so.1 -o libfinishm.so.1.0 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o probe_node_finder.o readToNode.o
