@@ -37,7 +37,7 @@ ifdef SINGLE_COV_CAT
 override DEF := $(DEF) -D SINGLE_COV_CAT
 endif
 
-OBJ = obj/tightString.o obj/run.o obj/splay.o obj/splayTable.o obj/graph.o obj/run2.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/scaffold.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o obj/probe_node_finder.o obj/readToNode.o
+OBJ = obj/tightString.o obj/run.o obj/splay.o obj/splayTable.o obj/graph.o obj/run2.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/scaffold.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o obj/probe_node_finder.o obj/readToNode.o obj/runReadToNode.o
 OBJDBG = $(subst obj,obj/dbg,$(OBJ))
 OBJSHARED = $(subst obj,obj/shared,$(OBJ))
 
@@ -135,3 +135,6 @@ obj/shared/%.o: src/%.c
 
 finishm: zlib obj/shared
 	cd obj/shared && gcc -shared -Wl,-soname,libfinishm.so.1 -o libfinishm.so.1.0 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o probe_node_finder.o readToNode.o
+
+readToNodeBinary: obj
+	$(CC) $(CFLAGS) $(OPT) $(LDFLAGS) -o readToNode obj/runReadToNode.o obj/tightString.o obj/graph.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/scaffold.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o obj/readToNode.o $(Z_LIB_FILES) $(LIBS)

@@ -151,7 +151,7 @@ ReadIdToNodeIdLookupTable* readReadIdToNodeIdLookupTable(char* fileName){
   lookupTable->num_reads = header.num_reads;
 
   //read index array
-  lookupTable->index = mallocOrExit((lookupTable->num_reads), IDnum);
+  lookupTable->index = callocOrExit((lookupTable->num_reads), IDnum);
   if (fread(lookupTable->index, sizeof(IDnum), lookupTable->num_reads, fp) != lookupTable->num_reads){
 		velvetLog("Unknown format (at index stage) for file %s\n", fileName);
 		fclose(fp);
@@ -173,17 +173,38 @@ ReadIdToNodeIdLookupTable* readReadIdToNodeIdLookupTable(char* fileName){
 }
 
 /* The main 'getter' function here. Return a struct representing an array start pointer and number of nodes
-(array entries) that the read is attached to.
+(array entries) that the read is attached to. No memory is malloc'd during this procedure so no free-ing is
+required.
 */
 ReadIdToNodeIdIndexation getReadIdToNodeIdIndexation(ReadIdToNodeIdLookupTable* lookupTable, IDnum readID){
   ReadIdToNodeIdIndexation toReturn;
+
+  if (readID > lookupTable->num_reads){
+    toReturn.num_nodes = 0;
+    return toReturn;
+  }
+
   toReturn.read_ids_node_ids = lookupTable->contents + lookupTable->index[readID-1]; //minus one as the array is 0-indexed
 
-  // work out the number of nodes by using the next read's offset, or
-  if (readID == lookupTable->num_reads){
-    toReturn.num_nodes = lookupTable->index[lookupTable->num_contents] - lookupTable->index[readID-1];
+  // work out the number of nodes by using the next read's offset, or the total size of the array
+  // however, if the next read has no nodes associated, then need to get the one after, and so on.
+  IDnum nextReadID = readID;
+  while (nextReadID < lookupTable->num_reads){
+    if (lookupTable->index[nextReadID] != 0)
+      break;
+    else
+      nextReadID += 1;
+  }
+  //printf("Using next read ID %i for input read %i\n", nextReadID+1, readID);
+  if (readID != 1 && lookupTable->index[readID-1] == 0 && lookupTable->index[nextReadID] != 0){
+    // this read is not associated with any node
+    toReturn.num_nodes = 0;
+  } else if (nextReadID >= lookupTable->num_reads){
+    //last read associated with any node case
+    toReturn.num_nodes = lookupTable->num_contents - lookupTable->index[readID-1];
   } else {
-    toReturn.num_nodes = lookupTable->index[readID] - lookupTable->index[readID-1];
+    //regular case
+    toReturn.num_nodes = lookupTable->index[nextReadID] - lookupTable->index[readID-1];
   }
 
   return toReturn;
@@ -195,42 +216,3 @@ void destroyReadIdToNodeIdLookupTable(ReadIdToNodeIdLookupTable* lookupTable){
   free(lookupTable->contents);
   free(lookupTable);
 }
-
-
-
-// int main(int argc, char **argv){
-//   Graph* graph = importGraph(argv[1]);
-//   ReadIdToNodeIdLookupTable* readToNode = createReadToNode(graph);
-//   printf("Parsed in graph with  %i reads and %i entries\n", readToNode->num_reads, readToNode->num_contents);
-//   printf("First entry was read %i and node %i\n", readToNode->contents[0].read_id, readToNode->contents[0].node_id);
-//   printf("2nd entry was read %i and node %i\n", readToNode->contents[1].read_id, readToNode->contents[1].node_id);
-//   char* fileName = "some.readToNodeTable";
-//   writeReadIdToNodeIdLookupTable(fileName, readToNode);
-//   printf("Finished writing\n");
-//   ReadIdToNodeIdLookupTable* readToNode2 = readReadIdToNodeIdLookupTable(fileName);
-//   printf("Finished reading\n");
-//   printf("Found %i reads and %i entries\n\n", readToNode2->num_reads, readToNode2->num_contents);
-
-//   ReadIdToNodeIdIndexation res;
-//   res = getReadIdToNodeIdIndexation(readToNode, 1);
-//   printf("Found %i (len %i) for that read 1, expected 1, len 1\n", res.read_ids_node_ids[0].node_id, res.num_nodes);
-//   res = getReadIdToNodeIdIndexation(readToNode, 2);
-//   printf("Found %i (len %i) for that read 2, expected -1, len 1\n", res.read_ids_node_ids[0].node_id, res.num_nodes);
-//   res = getReadIdToNodeIdIndexation(readToNode, 11);
-//   printf("Found %i (and %i) (len %i) for that read 11, expected [4], len 1\n", res.read_ids_node_ids[0].node_id, res.num_nodes);
-//   res = getReadIdToNodeIdIndexation(readToNode, 12);
-//   printf("Found %i and %i (len %i) for that read 12, expected [5,6], len 2\n", res.read_ids_node_ids[0].node_id, res.read_ids_node_ids[1].node_id, res.num_nodes);
-//   res = getReadIdToNodeIdIndexation(readToNode, 13);
-//   printf("Found %i (len %i) for that read 13, expected -1, len 1\n", res.read_ids_node_ids[0].node_id, res.num_nodes);
-
-//   res = getReadIdToNodeIdIndexation(readToNode, 3452);
-//   printf("Found %i and %i (len %i) for that read 3452\n", res.read_ids_node_ids[0].node_id, res.read_ids_node_ids[1].node_id, res.num_nodes);
-//   res = getReadIdToNodeIdIndexation(readToNode2, 3452);
-//   printf("Found %i and %i (len %i) for that read 3452\n", res.read_ids_node_ids[0].node_id, res.read_ids_node_ids[1].node_id, res.num_nodes);
-
-//   destroyReadIdToNodeIdLookupTable(readToNode);
-//   destroyReadIdToNodeIdLookupTable(readToNode2);
-//   destroyGraph(graph);
-
-//   return 0;
-// }
