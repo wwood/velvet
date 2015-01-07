@@ -2,3 +2,7 @@
 velvetg
 velveth
 obj/
+readToNode
+third-party/zlib-1.2.3/example
+third-party/zlib-1.2.3/libz.a
+third-party/zlib-1.2.3/minigzip
